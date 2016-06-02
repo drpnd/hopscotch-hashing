@@ -24,6 +24,22 @@
 #ifndef _HOPSCOTCH_H
 #define _HOPSCOTCH_H
 
+#include <stdint.h>
+#include <stdlib.h>
+
+struct hopscotch_bucket {
+    uint8_t *key;
+    void *data;
+    int ___keylen;
+    uint32_t hopinfo;
+};
+struct hopscotch_hash_table {
+    size_t pfactor;
+    size_t keylen;
+    struct hopscotch_bucket *buckets;
+};
+
+
 #endif /* _KERNEL_H */
 
 /*

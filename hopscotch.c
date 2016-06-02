@@ -22,6 +22,159 @@
  */
 
 #include "hopscotch.h"
+#include <stdlib.h>
+#include <string.h>
+
+/*
+ * Jenkins Hash Function
+ */
+static __inline__ uint32_t
+_jenkins_hash(uint8_t *key, size_t len)
+{
+    uint32_t hash;
+    size_t i;
+
+    hash = 0;
+    for ( i = 0; i < len; i++ ) {
+        hash += key[i];
+        hash += (hash << 10);
+        hash ^= (hash >> 6);
+    }
+    hash += (hash << 3);
+    hash ^= (hash >> 11);
+    hash += (hash << 15);
+
+    return hash;
+}
+
+/*
+ * Lookup
+ */
+void *
+hopscotch_lookup(struct hopscotch_hash_table *ht, uint8_t *key)
+{
+    uint32_t h;
+    size_t idx;
+    size_t i;
+    size_t sz;
+
+    sz = 1ULL << ht->pfactor;
+    h = _jenkins_hash(key, ht->keylen);
+    idx = h & (sz - 1);
+
+    if ( !ht->buckets[idx].hopinfo ) {
+        return NULL;
+    }
+    for ( i = 0; i < 32; i++ ) {
+        if ( ht->buckets[idx].hopinfo & (1 << i) ) {
+            if ( 0 == memcmp(key, ht->buckets[idx + i].key, 6) ) {
+                /* Found */
+                return ht->buckets[idx + i].data;
+            }
+        }
+    }
+
+    return NULL;
+}
+
+/*
+ * Insert an entry to the hash table
+ */
+int
+hopscotch_insert(struct hopscotch_hash_table *ht, uint8_t *key, void *data)
+{
+    uint32_t h;
+    size_t idx;
+    size_t i;
+    size_t sz;
+    size_t off;
+    size_t j;
+
+    sz = 1ULL << ht->pfactor;
+    h = _jenkins_hash(key, ht->keylen);
+    idx = h & (sz - 1);
+
+    /* Linear probing to find an empty bucket */
+    for ( i = idx; i < sz; i++ ) {
+        if ( NULL == ht->buckets[i].key ) {
+            /* Found an available bucket */
+            while ( i - idx >= 32 ) {
+                for ( j = 1; j < 32; j++ ) {
+                    if ( ht->buckets[i - j].hopinfo ) {
+                        off = __builtin_ctz(ht->buckets[i - j].hopinfo);
+                        if ( off >= j ) {
+                            continue;
+                        }
+                        ht->buckets[i].key = ht->buckets[i - j + off].key;
+                        ht->buckets[i].data = ht->buckets[i - j + off].data;
+                        ht->buckets[i - j + off].key = NULL;
+                        ht->buckets[i - j + off].data = NULL;
+                        ht->buckets[i - j].hopinfo &= ~(1ULL << off);
+                        ht->buckets[i - j].hopinfo |= (1ULL << j);
+                        i = i - j + off;
+                        break;
+                    }
+                }
+                if ( j >= 32 ) {
+                    return -1;
+                }
+            }
+
+            off = i - idx;
+            ht->buckets[i].key = key;
+            ht->buckets[i].data = data;
+            ht->buckets[idx].hopinfo |= (1ULL << off);
+
+            return 0;
+        }
+    }
+
+    return -1;
+}
+
+/*
+ * Resize the bucket size of the hash table
+ */
+int
+hopscotch_resize(struct hopscotch_hash_table *ht, int delta)
+{
+    size_t sz;
+    size_t opfactor;
+    size_t npfactor;
+    ssize_t i;
+    struct hopscotch_bucket *nbuckets;
+    struct hopscotch_bucket *obuckets;
+    int ret;
+
+    opfactor = ht->pfactor;
+    npfactor = ht->pfactor + delta;
+    sz = 1ULL << npfactor;
+
+    nbuckets = malloc(sizeof(struct hopscotch_bucket) * sz);
+    if ( NULL == nbuckets ) {
+        return -1;
+    }
+    memset(nbuckets, 0, sizeof(struct hopscotch_bucket) * sz);
+    obuckets = ht->buckets;
+
+    ht->buckets = nbuckets;
+    ht->pfactor = npfactor;
+
+    for ( i = 0; i < (1LL << opfactor); i++ ) {
+        if ( obuckets[i].key ) {
+            ret = hopscotch_insert(ht, obuckets[i].key, obuckets[i].data);
+            if ( ret < 0 ) {
+                ht->buckets = obuckets;
+                ht->pfactor = opfactor;
+                free(nbuckets);
+                return -1;
+            }
+        }
+    }
+    free(obuckets);
+
+    return 0;
+}
 
 /*
  * Local variables:
