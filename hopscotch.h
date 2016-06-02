@@ -50,6 +50,9 @@ extern "C" {
     struct hopscotch_hash_table *
     hopscotch_init(struct hopscotch_hash_table *, size_t);
     void hopscotch_release(struct hopscotch_hash_table *);
+    void * hopscotch_lookup(struct hopscotch_hash_table *, uint8_t *);
+    int hopscotch_insert(struct hopscotch_hash_table *, uint8_t *, void *);
+    int hopscotch_resize(struct hopscotch_hash_table *, int);
 
 #ifdef __cplusplus
 }

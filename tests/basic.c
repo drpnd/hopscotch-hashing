@@ -44,7 +44,7 @@
     } while ( 0 )
 
 /*
-   * Initialization test
+ * Initialization test
  */
 static int
 test_init(void)
@@ -66,6 +66,53 @@ test_init(void)
 }
 
 /*
+ * Lookup test
+ */
+static int
+test_lookup(void)
+{
+    struct hopscotch_hash_table *ht;
+    uint8_t key0[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0x01, 0x23, 0x45};
+    uint8_t key1[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    int ret;
+    void *val;
+
+    /* Initialize */
+    ht = hopscotch_init(NULL, 8);
+    if ( NULL == ht ) {
+        return -1;
+    }
+
+    /* No entry */
+    val = hopscotch_lookup(ht, key0);
+    if ( NULL != val ) {
+        /* Failed */
+        return -1;
+    }
+
+    TEST_PROGRESS();
+
+    /* Insert */
+    ret = hopscotch_insert(ht, key1, key1);
+    if ( ret < 0 ) {
+        /* Failed to insert */
+        return -1;
+    }
+
+    /* Lookup */
+    val = hopscotch_lookup(ht, key1);
+    if ( val != key1 ) {
+        /* Failed */
+        return -1;
+    }
+
+    /* Release */
+    hopscotch_release(ht);
+
+    return 0;
+}
+
+/*
  * Main routine for the basic test
  */
 int
@@ -78,6 +125,7 @@ main(int argc, const char *const argv[])
 
     /* Run tests */
     TEST_FUNC("init", test_init, ret);
+    TEST_FUNC("lookup", test_lookup, ret);
 
     return 0;
 }
