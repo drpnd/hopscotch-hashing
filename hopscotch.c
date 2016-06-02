@@ -48,6 +48,52 @@ _jenkins_hash(uint8_t *key, size_t len)
 }
 
 /*
+ * Initialize the hash table
+ */
+struct hopscotch_hash_table *
+hopscotch_init(struct hopscotch_hash_table *ht, size_t keylen)
+{
+    int pfactor;
+    struct hopscotch_bucket *buckets;
+
+    /* Allocate buckets first */
+    pfactor = HOPSCOTCH_INIT_BSIZE_FACTOR;
+    buckets = malloc(sizeof(struct hopscotch_bucket) * (1 << pfactor));
+    if ( NULL == buckets ) {
+        return NULL;
+    }
+    memset(buckets, 0, sizeof(struct hopscotch_bucket) * (1 << pfactor));
+
+    if ( NULL == ht ) {
+        ht = malloc(sizeof(struct hopscotch_hash_table));
+        if ( NULL == ht ) {
+            return NULL;
+        }
+        ht->_allocated = 1;
+    } else {
+        ht->_allocated = 0;
+    }
+    ht->pfactor = pfactor;
+    ht->buckets = buckets;
+    ht->keylen = keylen;
+
+    return ht;
+}
+
+/*
+ * Release the hash table
+ */
+void
+hopscotch_release(struct hopscotch_hash_table *ht)
+{
+    free(ht->buckets);
+    if ( ht->_allocated ) {
+        free(ht);
+    }
+}
+
+
+/*
  * Lookup
  */
 void *

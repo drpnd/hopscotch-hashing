@@ -22,10 +22,63 @@
  */
 
 #include "../hopscotch.h"
+#include <stdio.h>
 
+/* Macro for testing */
+#define TEST_FUNC(str, func, ret)                \
+    do {                                         \
+        printf("%s: ", str);                     \
+        if ( 0 == func() ) {                     \
+            printf("passed");                    \
+        } else {                                 \
+            printf("failed");                    \
+            ret = -1;                            \
+        }                                        \
+        printf("\n");                            \
+    } while ( 0 )
+
+#define TEST_PROGRESS()                              \
+    do {                                             \
+        printf(".");                                 \
+        fflush(stdout);                              \
+    } while ( 0 )
+
+/*
+   * Initialization test
+ */
+static int
+test_init(void)
+{
+    struct hopscotch_hash_table *ht;
+
+    /* Initialize */
+    ht = hopscotch_init(NULL, 8);
+    if ( NULL == ht ) {
+        return -1;
+    }
+
+    TEST_PROGRESS();
+
+    /* Release */
+    hopscotch_release(ht);
+
+    return 0;
+}
+
+/*
+ * Main routine for the basic test
+ */
 int
 main(int argc, const char *const argv[])
 {
+    int ret;
+
+    /* Reset */
+    ret = 0;
+
+    /* Run tests */
+    TEST_FUNC("init", test_init, ret);
+
     return 0;
 }
 

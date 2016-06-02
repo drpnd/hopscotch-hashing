@@ -27,6 +27,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define HOPSCOTCH_INIT_BSIZE_FACTOR     10
+
 struct hopscotch_bucket {
     uint8_t *key;
     void *data;
@@ -37,7 +39,21 @@ struct hopscotch_hash_table {
     size_t pfactor;
     size_t keylen;
     struct hopscotch_bucket *buckets;
+    int _allocated;
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+    /* in hopscotch.c */
+    struct hopscotch_hash_table *
+    hopscotch_init(struct hopscotch_hash_table *, size_t);
+    void hopscotch_release(struct hopscotch_hash_table *);
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /* _KERNEL_H */
