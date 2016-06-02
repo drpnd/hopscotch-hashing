@@ -67,7 +67,7 @@ hopscotch_lookup(struct hopscotch_hash_table *ht, uint8_t *key)
     }
     for ( i = 0; i < 32; i++ ) {
         if ( ht->buckets[idx].hopinfo & (1 << i) ) {
-            if ( 0 == memcmp(key, ht->buckets[idx + i].key, 6) ) {
+            if ( 0 == memcmp(key, ht->buckets[idx + i].key, ht->keylen) ) {
                 /* Found */
                 return ht->buckets[idx + i].data;
             }
