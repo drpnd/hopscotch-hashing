@@ -21,14 +21,10 @@
  * SOFTWARE.
  */
 
-#include "../hopscotch.h"
+#ifndef _HOPSCOTCH_H
+#define _HOPSCOTCH_H
 
-int
-main(int argc, const char *const argv[])
-{
-    return 0;
-}
-
+#endif /* _KERNEL_H */
 
 /*
  * Local variables:

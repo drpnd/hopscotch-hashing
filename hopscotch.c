@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-
+#include "hopscotch.h"
 
 /*
  * Local variables:
