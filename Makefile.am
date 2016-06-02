@@ -8,7 +8,7 @@
 
 bin_PROGRAMS = hopscotch_test_basic
 
-hopscotch_test_basic_SOURCES = tests/hopscotch_test_basic.c hopscotch.c
+hopscotch_test_basic_SOURCES = tests/basic.c hopscotch.c
 
 CLEANFILES = *~
 
