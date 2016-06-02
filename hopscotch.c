@@ -90,6 +90,12 @@ hopscotch_insert(struct hopscotch_hash_table *ht, uint8_t *key, void *data)
     size_t off;
     size_t j;
 
+    /* Ensure the key does not exist.  Duplicate keys are not allowed. */
+    if ( NULL != hopscotch_lookup(ht, key) ) {
+        /* The key already exists. */
+        return -1;
+    }
+
     sz = 1ULL << ht->pfactor;
     h = _jenkins_hash(key, ht->keylen);
     idx = h & (sz - 1);
