@@ -185,6 +185,41 @@ hopscotch_insert(struct hopscotch_hash_table *ht, uint8_t *key, void *data)
 }
 
 /*
+ * Remove an item
+ */
+void *
+hopscotch_remove(struct hopscotch_hash_table *ht, uint8_t *key)
+{
+    uint32_t h;
+    size_t idx;
+    size_t i;
+    size_t sz;
+    void *data;
+
+    sz = 1ULL << ht->pfactor;
+    h = _jenkins_hash(key, ht->keylen);
+    idx = h & (sz - 1);
+
+    if ( !ht->buckets[idx].hopinfo ) {
+        return NULL;
+    }
+    for ( i = 0; i < 32; i++ ) {
+        if ( ht->buckets[idx].hopinfo & (1 << i) ) {
+            if ( 0 == memcmp(key, ht->buckets[idx + i].key, ht->keylen) ) {
+                /* Found */
+                data = ht->buckets[idx + i].data;
+                ht->buckets[idx].hopinfo &= ~(1ULL << i);
+                ht->buckets[idx + i].key = NULL;
+                ht->buckets[idx + i].data = NULL;
+                return data;
+            }
+        }
+    }
+
+    return NULL;
+}
+
+/*
  * Resize the bucket size of the hash table
  */
 int

@@ -106,6 +106,20 @@ test_lookup(void)
         return -1;
     }
 
+    /* Lookup */
+    val = hopscotch_remove(ht, key1);
+    if ( val != key1 ) {
+        /* Failed */
+        return -1;
+    }
+
+    /* Lookup */
+    val = hopscotch_lookup(ht, key1);
+    if ( NULL != val ) {
+        /* Failed */
+        return -1;
+    }
+
     /* Release */
     hopscotch_release(ht);
 
