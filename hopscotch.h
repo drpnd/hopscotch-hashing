@@ -28,6 +28,7 @@
 #include <stdlib.h>
 
 #define HOPSCOTCH_INIT_BSIZE_FACTOR     10
+#define HOPSCOTCH_HOPINFO_SIZE          32
 
 struct hopscotch_bucket {
     uint8_t *key;

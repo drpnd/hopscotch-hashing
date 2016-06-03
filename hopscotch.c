@@ -111,7 +111,7 @@ hopscotch_lookup(struct hopscotch_hash_table *ht, uint8_t *key)
     if ( !ht->buckets[idx].hopinfo ) {
         return NULL;
     }
-    for ( i = 0; i < 32; i++ ) {
+    for ( i = 0; i < HOPSCOTCH_HOPINFO_SIZE; i++ ) {
         if ( ht->buckets[idx].hopinfo & (1 << i) ) {
             if ( 0 == memcmp(key, ht->buckets[idx + i].key, ht->keylen) ) {
                 /* Found */
@@ -150,8 +150,8 @@ hopscotch_insert(struct hopscotch_hash_table *ht, uint8_t *key, void *data)
     for ( i = idx; i < sz; i++ ) {
         if ( NULL == ht->buckets[i].key ) {
             /* Found an available bucket */
-            while ( i - idx >= 32 ) {
-                for ( j = 1; j < 32; j++ ) {
+            while ( i - idx >= HOPSCOTCH_HOPINFO_SIZE ) {
+                for ( j = 1; j < HOPSCOTCH_HOPINFO_SIZE; j++ ) {
                     if ( ht->buckets[i - j].hopinfo ) {
                         off = __builtin_ctz(ht->buckets[i - j].hopinfo);
                         if ( off >= j ) {
@@ -167,7 +167,7 @@ hopscotch_insert(struct hopscotch_hash_table *ht, uint8_t *key, void *data)
                         break;
                     }
                 }
-                if ( j >= 32 ) {
+                if ( j >= HOPSCOTCH_HOPINFO_SIZE ) {
                     return -1;
                 }
             }
@@ -203,7 +203,7 @@ hopscotch_remove(struct hopscotch_hash_table *ht, uint8_t *key)
     if ( !ht->buckets[idx].hopinfo ) {
         return NULL;
     }
-    for ( i = 0; i < 32; i++ ) {
+    for ( i = 0; i < HOPSCOTCH_HOPINFO_SIZE; i++ ) {
         if ( ht->buckets[idx].hopinfo & (1 << i) ) {
             if ( 0 == memcmp(key, ht->buckets[idx + i].key, ht->keylen) ) {
                 /* Found */
