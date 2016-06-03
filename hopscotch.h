@@ -33,8 +33,8 @@
 struct hopscotch_bucket {
     uint8_t *key;
     void *data;
-    int ___keylen;
     uint32_t hopinfo;
+    uint32_t rsvd;
 };
 struct hopscotch_hash_table {
     size_t pfactor;
