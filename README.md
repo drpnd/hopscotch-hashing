@@ -1,7 +1,7 @@
 # Hopscotch Hashing
 
 ## About
-An implementation of Hopscotch hashing [1].
+An implementation of Hopscotch hashing [1].  Jenkins hash function is used for key hashing.
 
 [1] M. Herlihy, N. Shavit, and M. Tzafrir, "Hopscotch hashing", in Proceedings of the 22nd International Symposium on Distributed Computing, 2008
 
