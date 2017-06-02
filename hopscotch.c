@@ -97,7 +97,7 @@ hopscotch_release(struct hopscotch_hash_table *ht)
  * Lookup
  */
 void *
-hopscotch_lookup(struct hopscotch_hash_table *ht, uint8_t *key)
+hopscotch_lookup(struct hopscotch_hash_table *ht, void *key)
 {
     uint32_t h;
     size_t idx;
@@ -127,7 +127,7 @@ hopscotch_lookup(struct hopscotch_hash_table *ht, uint8_t *key)
  * Insert an entry to the hash table
  */
 int
-hopscotch_insert(struct hopscotch_hash_table *ht, uint8_t *key, void *data)
+hopscotch_insert(struct hopscotch_hash_table *ht, void *key, void *data)
 {
     uint32_t h;
     size_t idx;
@@ -188,7 +188,7 @@ hopscotch_insert(struct hopscotch_hash_table *ht, uint8_t *key, void *data)
  * Remove an item
  */
 void *
-hopscotch_remove(struct hopscotch_hash_table *ht, uint8_t *key)
+hopscotch_remove(struct hopscotch_hash_table *ht, void *key)
 {
     uint32_t h;
     size_t idx;

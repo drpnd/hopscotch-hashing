@@ -31,7 +31,7 @@
 #define HOPSCOTCH_HOPINFO_SIZE          32
 
 struct hopscotch_bucket {
-    uint8_t *key;
+    void *key;
     void *data;
     uint32_t hopinfo;
     uint32_t rsvd;
@@ -51,9 +51,9 @@ extern "C" {
     struct hopscotch_hash_table *
     hopscotch_init(struct hopscotch_hash_table *, size_t);
     void hopscotch_release(struct hopscotch_hash_table *);
-    void * hopscotch_lookup(struct hopscotch_hash_table *, uint8_t *);
-    int hopscotch_insert(struct hopscotch_hash_table *, uint8_t *, void *);
-    void * hopscotch_remove(struct hopscotch_hash_table *, uint8_t *);
+    void * hopscotch_lookup(struct hopscotch_hash_table *, void *);
+    int hopscotch_insert(struct hopscotch_hash_table *, void *, void *);
+    void * hopscotch_remove(struct hopscotch_hash_table *, void *);
     int hopscotch_resize(struct hopscotch_hash_table *, int);
 
 #ifdef __cplusplus
