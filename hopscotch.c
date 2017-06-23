@@ -1,5 +1,5 @@
 /*_
- * Copyright (c) 2016 Hirochika Asai <asai@jar.jp>
+ * Copyright (c) 2016-2017 Hirochika Asai <asai@jar.jp>
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -53,16 +53,16 @@ _jenkins_hash(uint8_t *key, size_t len)
 struct hopscotch_hash_table *
 hopscotch_init(struct hopscotch_hash_table *ht, size_t keylen)
 {
-    int pfactor;
+    int exponent;
     struct hopscotch_bucket *buckets;
 
     /* Allocate buckets first */
-    pfactor = HOPSCOTCH_INIT_BSIZE_FACTOR;
-    buckets = malloc(sizeof(struct hopscotch_bucket) * (1 << pfactor));
+    exponent = HOPSCOTCH_INIT_BSIZE_EXPONENT;
+    buckets = malloc(sizeof(struct hopscotch_bucket) * (1 << exponent));
     if ( NULL == buckets ) {
         return NULL;
     }
-    memset(buckets, 0, sizeof(struct hopscotch_bucket) * (1 << pfactor));
+    memset(buckets, 0, sizeof(struct hopscotch_bucket) * (1 << exponent));
 
     if ( NULL == ht ) {
         ht = malloc(sizeof(struct hopscotch_hash_table));
@@ -73,7 +73,7 @@ hopscotch_init(struct hopscotch_hash_table *ht, size_t keylen)
     } else {
         ht->_allocated = 0;
     }
-    ht->pfactor = pfactor;
+    ht->exponent = exponent;
     ht->buckets = buckets;
     ht->keylen = keylen;
 
@@ -104,7 +104,7 @@ hopscotch_lookup(struct hopscotch_hash_table *ht, void *key)
     size_t i;
     size_t sz;
 
-    sz = 1ULL << ht->pfactor;
+    sz = 1ULL << ht->exponent;
     h = _jenkins_hash(key, ht->keylen);
     idx = h & (sz - 1);
 
@@ -142,7 +142,7 @@ hopscotch_insert(struct hopscotch_hash_table *ht, void *key, void *data)
         return -1;
     }
 
-    sz = 1ULL << ht->pfactor;
+    sz = 1ULL << ht->exponent;
     h = _jenkins_hash(key, ht->keylen);
     idx = h & (sz - 1);
 
@@ -196,7 +196,7 @@ hopscotch_remove(struct hopscotch_hash_table *ht, void *key)
     size_t sz;
     void *data;
 
-    sz = 1ULL << ht->pfactor;
+    sz = 1ULL << ht->exponent;
     h = _jenkins_hash(key, ht->keylen);
     idx = h & (sz - 1);
 
@@ -226,16 +226,16 @@ int
 hopscotch_resize(struct hopscotch_hash_table *ht, int delta)
 {
     size_t sz;
-    size_t opfactor;
-    size_t npfactor;
+    size_t oexp;
+    size_t nexp;
     ssize_t i;
     struct hopscotch_bucket *nbuckets;
     struct hopscotch_bucket *obuckets;
     int ret;
 
-    opfactor = ht->pfactor;
-    npfactor = ht->pfactor + delta;
-    sz = 1ULL << npfactor;
+    oexp = ht->exponent;
+    nexp = ht->exponent + delta;
+    sz = 1ULL << nexp;
 
     nbuckets = malloc(sizeof(struct hopscotch_bucket) * sz);
     if ( NULL == nbuckets ) {
@@ -245,14 +245,14 @@ hopscotch_resize(struct hopscotch_hash_table *ht, int delta)
     obuckets = ht->buckets;
 
     ht->buckets = nbuckets;
-    ht->pfactor = npfactor;
+    ht->exponent = nexp;
 
-    for ( i = 0; i < (1LL << opfactor); i++ ) {
+    for ( i = 0; i < (1LL << oexp); i++ ) {
         if ( obuckets[i].key ) {
             ret = hopscotch_insert(ht, obuckets[i].key, obuckets[i].data);
             if ( ret < 0 ) {
                 ht->buckets = obuckets;
-                ht->pfactor = opfactor;
+                ht->exponent = oexp;
                 free(nbuckets);
                 return -1;
             }

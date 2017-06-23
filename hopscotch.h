@@ -1,5 +1,5 @@
 /*_
- * Copyright (c) 2016 Hirochika Asai <asai@jar.jp>
+ * Copyright (c) 2016-2017 Hirochika Asai <asai@jar.jp>
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,17 +27,25 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define HOPSCOTCH_INIT_BSIZE_FACTOR     10
+/* Initial size of buckets.  2 to the power of this value will be allocated. */
+#define HOPSCOTCH_INIT_BSIZE_EXPONENT   10
+/* Bitmap size used for linear probing in hopscotch hashing */
 #define HOPSCOTCH_HOPINFO_SIZE          32
 
+/*
+ * Buckets
+ */
 struct hopscotch_bucket {
     void *key;
     void *data;
     uint32_t hopinfo;
-    uint32_t rsvd;
-};
+} __attribute__ ((aligned (8)));
+
+/*
+ * Hash table of hopscotch hashing
+ */
 struct hopscotch_hash_table {
-    size_t pfactor;
+    size_t exponent;
     size_t keylen;
     struct hopscotch_bucket *buckets;
     int _allocated;
