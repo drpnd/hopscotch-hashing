@@ -69,7 +69,7 @@ extern "C" {
 #endif
 
 
-#endif /* _KERNEL_H */
+#endif /* _HOPSCOTCH_H */
 
 /*
  * Local variables:
